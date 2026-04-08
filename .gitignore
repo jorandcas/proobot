@@ -1,0 +1,54 @@
+# Environment files - CRITICAL: Never commit credentials
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.js
+*.js.map
+!src/**/*.js
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+worker-agent/logs/
+
+# Evidence and uploads
+uploads/evidence/
+worker-agent/evidence/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/database.json
+
+# SSL certificates
+ssl/
+*.pem
+*.crt
+*.key
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp files
+*.tmp
+*.temp
+.READEME.md
+
+# Appium screenshots temporales
+*.png
+!**/*.png  # Permitir screenshots en evidencias

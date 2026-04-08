@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  # ============================================
+  # PostgreSQL - Base de datos
+  # ============================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: movistar-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: movistar_bot
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - movistar-network
+
+  # ============================================
+  # Redis - Cola de trabajos
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: movistar-redis
+    command: redis-server --requirepass ""
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - movistar-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  movistar-network:
+    driver: bridge

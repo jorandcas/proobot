@@ -1,0 +1,30 @@
+{
+  "name": "poc-login",
+  "version": "1.0.0",
+  "description": "Sistema de automatización de portabilidades Movistar Onix",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "ts-node src/main.ts",
+    "build": "npm run build --workspaces",
+    "build:packages": "npm run build --workspaces --if-present",
+    "start": "node dist/main.js"
+  },
+  "keywords": ["automation", "portability", "movistar", "onix"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@poc-login/config": "^1.0.0",
+    "@poc-login/core": "^1.0.0",
+    "@poc-login/flows": "^1.0.0",
+    "dotenv": "^17.3.1",
+    "webdriverio": "^9.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

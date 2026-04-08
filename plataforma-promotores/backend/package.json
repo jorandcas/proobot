@@ -1,0 +1,56 @@
+{
+  "name": "plataforma-promotores-backend",
+  "version": "1.0.0",
+  "description": "Backend para plataforma de promotores - Sistema de portabilidad",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "init-db": "ts-node src/utils/init-db.ts",
+    "get-ip": "node ../get-ip.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "migrate:data": "ts-node src/scripts/migrate-data.ts",
+    "create-admin": "ts-node src/scripts/create-admin.ts --admin",
+    "create-user": "ts-node src/scripts/create-admin.ts"
+  },
+  "keywords": [
+    "portabilidad",
+    "telcel",
+    "bot",
+    "automation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.5.0",
+    "@prisma/client": "^7.5.0",
+    "bcryptjs": "^2.4.3",
+    "bull": "^4.12.2",
+    "cors": "^2.8.5",
+    "cross-spawn": "^7.0.6",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "ioredis": "^5.3.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "nanoid": "^3.3.7",
+    "pg": "^8.20.0",
+    "prisma": "^7.5.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/multer": "^1.4.11",
+    "@types/nanoid": "^3.0.0",
+    "@types/node": "^20.10.6",
+    "@types/uuid": "^9.0.7",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3"
+  }
+}

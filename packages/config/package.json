@@ -1,0 +1,19 @@
+{
+  "name": "@poc-login/config",
+  "version": "1.0.0",
+  "description": "Configuración compartida - Selectors, Timeouts y Environment",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts"
+  },
+  "keywords": ["config", "selectors", "timeouts"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

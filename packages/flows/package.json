@@ -1,0 +1,24 @@
+{
+  "name": "@poc-login/flows",
+  "version": "1.0.0",
+  "description": "Flujos de automatización compartidos - Login, Post-login, Secciones",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts"
+  },
+  "keywords": ["flows", "automation", "login", "sections"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@poc-login/config": "^1.0.0",
+    "@poc-login/core": "^1.0.0",
+    "webdriverio": "^9.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

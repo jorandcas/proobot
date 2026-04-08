@@ -1,0 +1,284 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// USUARIOS - Administradores y Promotores
+// ============================================
+model Usuario {
+  id            String    @id @default(uuid())
+  correo        String    @unique
+  contrasena    String    // bcrypt hash
+  rol           Rol       // admin | promotor
+  nombre        String
+  fechaCreacion DateTime  @default(now())
+  tokenVersion  Int       @default(0) // For revoking sessions
+
+  // Relaciones
+  tramites      Tramite[]
+  botExecutions BotExecution[]
+
+  @@map("usuarios")
+}
+
+enum Rol {
+  ADMIN
+  PROMOTOR
+}
+
+// ============================================
+// CAMPAÑAS - Agrupación por fecha
+// ============================================
+model Campana {
+  id          String    @id @default(uuid())
+  nombre      String
+  fecha       DateTime // Fecha de la campaña (YYYY-MM-DD)
+  fechaInicio DateTime  // Inicio del rango (6:00 AM del día anterior)
+  fechaFin    DateTime  // Fin del rango (5:59 AM del día actual)
+  activa      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  // Relaciones
+  tramites    Tramite[]
+
+  @@index([fecha])
+  @@index([activa])
+  @@map("campanas")
+}
+
+// ============================================
+// TRÁMITES - Portabilidad de líneas
+// ============================================
+model Tramite {
+  id                 String        @id @default(uuid())
+  idCampana          String
+  idPromotor         String
+  fechaCreacion      DateTime      @default(now())
+  estado             EstadoTramite @default(PENDIENTE)
+  fechaProcesamiento DateTime?
+
+  // Datos del formulario de búsqueda
+  dn                 String?
+  rfc                String?
+  requestId          String?
+
+  // ICC y Línea
+  icc                String?
+  nip                String?
+  fvcIndice          Int?     // 1-5 (índice de fecha)
+  fvcFecha           String?  // DD/MM/YYYY
+
+  // Datos personales
+  nombre             String?
+  nombreSegundo      String?
+  apellidoPaterno    String?
+  apellidoMaterno    String?
+  curp               String?
+  telefono           String?
+  telefono2          String?
+  genero             String?
+  email              String?
+  fechaNacimiento    String?
+
+  // Resultado del procesamiento
+  resultado          String?  // Mensaje de éxito/error
+  botLogId           String?  // NOT unique - multiple logs per tramite (retry attempts)
+  mensajeCorreccion  String?  // Mensaje de corrección para el promotor
+
+  // Relaciones
+  campana            Campana   @relation(fields: [idCampana], references: [id])
+  promotor           Usuario   @relation(fields: [idPromotor], references: [id])
+  botLogs            BotLog[]  // 1-to-many: un tramite puede tener múltiples logs (reintentos)
+  jobs               Job[]     // 1-to-many: un tramite puede tener múltiples jobs (reintentos de cola)
+
+  @@index([idCampana])
+  @@index([idPromotor])
+  @@index([estado])
+  @@index([fechaCreacion])
+  @@map("tramites")
+}
+
+enum EstadoTramite {
+  PENDIENTE
+  PROCESANDO
+  COMPLETADO
+  ERROR
+  CANCELADO
+}
+
+// ============================================
+// BOT LOGS - Logs detallados de cada ejecución
+// ============================================
+model BotLog {
+  id          String    @id @default(uuid())
+  idTramite   String    // NOT unique - multiple attempts per tramite
+  idDevice    String
+  fechaInicio DateTime
+  fechaFin    DateTime
+  estado      EstadoLog
+  logs        String[]  // Array de strings (logs del bot)
+  error       String?   // Mensaje de error si falló
+
+  // Relaciones
+  tramite     Tramite   @relation(fields: [idTramite], references: [id])
+  device      Device    @relation(fields: [idDevice], references: [id])
+
+  @@index([idTramite])
+  @@index([idDevice])
+  @@index([fechaInicio])
+  @@map("bot_logs")
+}
+
+enum EstadoLog {
+  EXITOSO
+  FALLIDO
+}
+
+// ============================================
+// DEVICES - Dispositivos Android para ejecutar bots
+// ============================================
+model Device {
+  id        String        @id @default(uuid())
+  udid      String        @unique  // UDID del dispositivo Android
+  name      String
+  status    DeviceStatus  @default(AVAILABLE)
+  workerUrl String        @default("")  // URL del bot worker HTTP
+  lastUsed  DateTime?
+  createdAt DateTime      @default(now())
+
+  // Relaciones
+  botLogs   BotLog[]
+  worker    Worker?
+
+  @@index([status])
+  @@map("devices")
+}
+
+enum DeviceStatus {
+  AVAILABLE
+  BUSY
+  OFFLINE
+}
+
+// ============================================
+// BOT EXECUTIONS - Ejecuciones batch (procesar varios trámites)
+// ============================================
+model BotExecution {
+  id             String         @id @default(uuid())
+  fechaInicio    DateTime
+  fechaFin       DateTime?
+  estado         EstadoEjecucion @default(PENDIENTE)
+  totalTramites  Int            @default(0)
+  completados    Int            @default(0)
+  errores        Int            @default(0)
+  logs           String[]       // Array de strings
+  ejecutadoPor   String         // ID del usuario admin
+
+  // Relaciones
+  ejecutor       Usuario        @relation(fields: [ejecutadoPor], references: [id])
+
+  @@index([fechaInicio])
+  @@index([estado])
+  @@map("bot_executions")
+}
+
+enum EstadoEjecucion {
+  PENDIENTE
+  EN_PROGRESO
+  COMPLETADO
+  CANCELADO
+}
+
+// ============================================
+// WORKERS - Nodos ejecutores locales (Capa 2)
+// ============================================
+model Worker {
+  id            String       @id @default(uuid())
+  name          String
+  location      String                        // Ubicación: "Sede Norte", "Distribuidor X"
+  deviceId      String?                       // ID del dispositivo Android asociado
+  status        WorkerStatus @default(OFFLINE)
+  lastHeartbeat DateTime?
+  ip            String?
+  apiKey        String?                       // API key para autenticación
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // Relaciones
+  jobs          Job[]
+  device        Device?      @relation(fields: [deviceId], references: [id])
+
+  @@index([status])
+  @@index([lastHeartbeat])
+  @@map("workers")
+}
+
+enum WorkerStatus {
+  ONLINE
+  BUSY
+  OFFLINE
+  ERROR
+}
+
+// ============================================
+// JOBS - Trabajos en cola para procesamiento
+// ============================================
+model Job {
+  id            String    @id @default(uuid())
+  tramiteId     String
+  tramite       Tramite   @relation(fields: [tramiteId], references: [id])
+  workerId      String?
+  worker        Worker?   @relation(fields: [workerId], references: [id])
+  status        JobStatus @default(WAITING)
+  priority      Int       @default(0)
+  retryCount    Int       @default(0)
+  maxRetries    Int       @default(3)
+  assignedAt    DateTime?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  errorMessage  String?
+  folioId       String?   // Resultado exitoso: FolioID de portabilidad
+  evidence      JobEvidence?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([status])
+  @@index([workerId])
+  @@index([priority])
+  @@index([createdAt])
+  @@map("jobs")
+}
+
+enum JobStatus {
+  WAITING
+  ASSIGNED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// ============================================
+// JOB EVIDENCE - Evidencias de ejecución (logs, screenshots)
+// ============================================
+model JobEvidence {
+  id            String   @id @default(uuid())
+  jobId         String   @unique
+  job           Job      @relation(fields: [jobId], references: [id])
+  logsPath      String?
+  screenshots   String[] // Array de URLs
+  videoPath     String?
+  metadata      Json?    // Datos adicionales (timing, steps, etc)
+
+  createdAt     DateTime @default(now())
+
+  @@map("job_evidence")
+}
