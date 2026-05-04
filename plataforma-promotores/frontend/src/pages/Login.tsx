@@ -36,14 +36,14 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         {/* Title */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-3">
+          <h1 className="text-4xl font-bold text-gray-900 mb-3">
             Bienvenido
           </h1>
-          <p className="text-sm text-blue-100">Inicia sesión en tu cuenta</p>
+          <p className="text-sm text-gray-600">Inicia sesión en tu cuenta</p>
         </div>
 
         {/* Login Card */}

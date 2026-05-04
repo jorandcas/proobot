@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test API - Trámites</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+    }
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    pre {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      border: 1px solid #dee2e6;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .data-card {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #dee2e6;
+    }
+    .data-card h3 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: #495057;
+    }
+    .data-card p {
+      margin: 5px 0;
+      font-size: 12px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 10px 5px 10px 0;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Test API - Trámites</h1>
+    <p>Esta página prueba la conexión con la API de trámites</p>
+
+    <div id="status"></div>
+
+    <button onclick="testAPI()">Test API /api/dashboard/recent</button>
+    <button onclick="testWithLimit()">Test con limit=1000</button>
+    <button onclick="checkAuth()">Verificar Token</button>
+    <button onclick="clearDisplay()">Limpiar</button>
+
+    <div id="response"></div>
+    <div id="dataDisplay"></div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3001/api';
+
+    function log(message, type = 'info') {
+      const statusDiv = document.getElementById('status');
+      const time = new Date().toLocaleTimeString();
+      statusDiv.innerHTML = `<div class="status ${type}">[${time}] ${message}</div>`;
+    }
+
+    function clearDisplay() {
+      document.getElementById('response').innerHTML = '';
+      document.getElementById('dataDisplay').innerHTML = '';
+      document.getElementById('status').innerHTML = '';
+    }
+
+    function checkAuth() {
+      const token = localStorage.getItem('token');
+      const usuario = localStorage.getItem('usuario');
+
+      let html = '<div class="info">';
+      html += '<h3>🔑 Estado de Autenticación</h3>';
+
+      if (token) {
+        html += '<p>✅ Token encontrado: ' + token.substring(0, 20) + '...</p>';
+        html += '<p>Longitud: ' + token.length + ' caracteres</p>';
+      } else {
+        html += '<p>❌ No hay token en localStorage</p>';
+      }
+
+      if (usuario) {
+        html += '<p>✅ Usuario: ' + usuario + '</p>';
+      } else {
+        html += '<p>❌ No hay usuario en localStorage</p>';
+      }
+
+      html += '</div>';
+      document.getElementById('response').innerHTML = html;
+    }
+
+    async function testAPI() {
+      try {
+        log('🚀 Iniciando petición a /api/dashboard/recent...', 'info');
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+          log('❌ No hay token. Por favor inicia sesión primero en la app principal.', 'error');
+          return;
+        }
+
+        const response = await fetch(API_URL + '/dashboard/recent', {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        log('📡 Respuesta recibida. Status: ' + response.status, 'info');
+
+        const data = await response.json();
+
+        // Mostrar respuesta completa
+        let html = '<h3>📋 Respuesta Completa:</h3>';
+        html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        document.getElementById('response').innerHTML = html;
+
+        if (data.success) {
+          log('✅ Éxito! La API respondió correctamente.', 'success');
+
+          if (data.data && Array.isArray(data.data)) {
+            log('📊 Datos recibidos: ' + data.data.length + ' trámites', 'success');
+            displayTramites(data.data);
+          } else {
+            log('⚠️ La respuesta no contiene un array de datos', 'error');
+          }
+        } else {
+          log('❌ Error: ' + (data.error || 'Error desconocido'), 'error');
+        }
+
+      } catch (error) {
+        log('❌ Error en la petición: ' + error.message, 'error');
+        console.error('Error completo:', error);
+      }
+    }
+
+    async function testWithLimit() {
+      try {
+        log('🚀 Iniciando petición con limit=1000...', 'info');
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+          log('❌ No hay token. Por favor inicia sesión primero.', 'error');
+          return;
+        }
+
+        const response = await fetch(API_URL + '/dashboard/recent?limit=1000', {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        let html = '<h3>📋 Respuesta con limit=1000:</h3>';
+        html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        document.getElementById('response').innerHTML = html;
+
+        if (data.success && data.data) {
+          log('✅ Recibidos ' + data.data.length + ' trámites', 'success');
+          displayTramites(data.data);
+        }
+
+      } catch (error) {
+        log('❌ Error: ' + error.message, 'error');
+      }
+    }
+
+    function displayTramites(tramites) {
+      if (!Array.isArray(tramites) || tramites.length === 0) {
+        document.getElementById('dataDisplay').innerHTML = '<p class="error">No hay trámites para mostrar</p>';
+        return;
+      }
+
+      let html = '<h3>📊 Trámites (' + tramites.length + '):</h3>';
+      html += '<div class="data-grid">';
+
+      tramites.forEach((t, index) => {
+        html += '<div class="data-card">';
+        html += '<h3>#' + (index + 1) + ' - ' + (t.estado || 'Sin estado') + '</h3>';
+        html += '<p><strong>ID:</strong> ' + t.id + '</p>';
+        html += '<p><strong>DN:</strong> ' + (t.dn || 'N/A') + '</p>';
+        html += '<p><strong>Nombre:</strong> ' + (t.nombre || 'N/A') + ' ' + (t.apellidoPaterno || '') + '</p>';
+        html += '<p><strong>ICC:</strong> ' + (t.icc || 'N/A') + '</p>';
+        html += '<p><strong>Fecha:</strong> ' + (t.fechaCreacion || 'N/A') + '</p>';
+        html += '</div>';
+      });
+
+      html += '</div>';
+      document.getElementById('dataDisplay').innerHTML = html;
+    }
+
+    // Auto-check auth on load
+    window.onload = function() {
+      checkAuth();
+    };
+  </script>
+</body>
+</html>

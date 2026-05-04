@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import { promises as fs } from 'fs';
 import path from 'path';
-
-const prisma = new PrismaClient();
+import { prisma } from '../config/database.prisma';
 
 /**
  * Datos para crear evidencia de un job

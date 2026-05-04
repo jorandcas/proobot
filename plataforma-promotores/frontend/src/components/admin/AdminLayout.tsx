@@ -18,23 +18,25 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
       <AdminSidebar />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Top Bar */}
-        <header className="bg-white/80 backdrop-blur-lg shadow-md px-6 py-4 border-b border-slate-200">
+        <header className="bg-white border-b border-gray-200 px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <h2 className="text-2xl font-bold text-gray-900">
                 Bienvenido, {usuario?.nombre}
               </h2>
-              <p className="text-sm text-slate-600 font-medium">Admin</p>
+              <p className="text-sm text-gray-600 mt-1">
+                Administrador del sistema
+              </p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-slate-500 font-medium">
+              <p className="text-sm text-gray-500 font-medium">
                 {new Date().toLocaleDateString('es-ES', {
                   weekday: 'long',
                   year: 'numeric',
@@ -47,7 +49,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-8 overflow-auto">
           {children}
         </main>
       </div>

@@ -1,8 +1,6 @@
 import Bull, { Job as BullJob } from 'bull';
-import { PrismaClient } from '@prisma/client';
 import redis from '../config/redis.config';
-
-const prisma = new PrismaClient();
+import { prisma } from '../config/database.prisma';
 
 // Tipos de datos para los jobs
 export interface PortabilityJobData {

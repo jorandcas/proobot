@@ -1,7 +1,6 @@
-import { PrismaClient, WorkerStatus } from '@prisma/client';
+import { WorkerStatus } from '@prisma/client';
 import { nanoid } from 'nanoid';
-
-const prisma = new PrismaClient();
+import { prisma } from '../config/database.prisma';
 
 /**
  * Datos para registrar un nuevo worker

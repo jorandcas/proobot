@@ -78,14 +78,20 @@ export class DashboardController {
 
       // If promotor, use filtered view (hide technical errors, translate states)
       if (req.usuario?.rol === 'promotor') {
+        console.log(`🔍 [DEBUG] Obteniendo trámites para promotor: ${req.usuario.id}`);
         tramites = await tramiteModel.getForPromotor(req.usuario.id);
+        console.log(`📊 [DEBUG] Trámites obtenidos para promotor: ${tramites.length}`);
+        console.log(`📋 [DEBUG] Estados de los trámites:`, tramites.map(t => t.estado));
       } else {
         // Admin sees all
+        console.log(`🔍 [DEBUG] Obteniendo trámites para admin`);
         tramites = await tramiteModel.getAllWithResponse();
+        console.log(`📊 [DEBUG] Trámites obtenidos para admin: ${tramites.length}`);
       }
 
       // Get only the most recent
       const recentTramites = tramites.slice(0, limit);
+      console.log(`✅ [DEBUG] Enviando ${recentTramites.length} trámites al frontend`);
 
       res.json({
         success: true,

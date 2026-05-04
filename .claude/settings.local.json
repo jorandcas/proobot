@@ -53,7 +53,16 @@
       "Bash(copy:*)",
       "Bash(npm:*)",
       "Bash(docker:*)",
-      "Bash(docker-compose:*)"
+      "Bash(docker-compose:*)",
+      "Bash(git fetch:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(docker pull:*)",
+      "Bash(npm run create-admin:*)",
+      "Bash(docker exec:*)",
+      "Bash(npx prisma db pull:*)",
+      "Bash(npx prisma db execute --stdin <<'EOF'\nSELECT COUNT(*) as total_tramites FROM tramites;\nSELECT * FROM tramites ORDER BY fecha_creacion DESC LIMIT 5;\nEOF)",
+      "Bash(npx prisma db execute:*)",
+      "Bash(git remote set-url:*)"
     ]
   }
 }

@@ -4,12 +4,13 @@ interface Column<T> {
   key: string;
   label: string;
   className?: string;
+  render?: (value: any, row: T, index: number) => React.ReactNode;
 }
 
 interface TableProps<T> {
   columns: Column<T>[];
   data: T[];
-  renderRow: (item: T, index: number) => React.ReactNode;
+  keyColumn: string;
   onRowClick?: (item: T) => void;
   emptyMessage?: string;
   className?: string;
@@ -18,11 +19,15 @@ interface TableProps<T> {
 export function Table<T>({
   columns,
   data,
-  renderRow,
+  keyColumn,
   onRowClick,
   emptyMessage = 'No hay datos disponibles',
   className = ''
 }: TableProps<T>) {
+  console.log('📊 [TABLE] Renderizado con datos:', data.length, 'filas');
+  console.log('📊 [TABLE] Columnas:', columns);
+  console.log('📊 [TABLE] KeyColumn:', keyColumn);
+
   if (data.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500 bg-white rounded-lg border border-gray-200">
@@ -62,17 +67,33 @@ export function Table<T>({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {data.map((item, index) => (
-            <tr
-              key={index}
-              className={`
-                ${onRowClick ? 'hover:bg-gray-50 cursor-pointer transition-colors' : ''}
-              `}
-              onClick={() => onRowClick?.(item)}
-            >
-              {renderRow(item, index)}
-            </tr>
-          ))}
+          {data.map((item, index) => {
+            console.log(`📊 [TABLE] Renderizando fila ${index}:`, item);
+            return (
+              <tr
+                key={(item as any)[keyColumn] || index}
+                className={`
+                  ${onRowClick ? 'hover:bg-gray-50 cursor-pointer transition-colors' : ''}
+                `}
+                onClick={() => onRowClick?.(item)}
+              >
+                {columns.map((column) => {
+                  const value = (item as any)[column.key];
+                  console.log(`📊 [TABLE] Celda ${column.key}:`, value, 'Render:', column.render);
+                  return (
+                    <td
+                      key={column.key}
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                    >
+                      {column.render
+                        ? column.render(value, item, index)
+                        : (value ?? '-')}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

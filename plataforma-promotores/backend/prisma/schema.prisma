@@ -203,7 +203,7 @@ model Worker {
   id            String       @id @default(uuid())
   name          String
   location      String                        // Ubicación: "Sede Norte", "Distribuidor X"
-  deviceId      String?                       // ID del dispositivo Android asociado
+  deviceId      String?      @unique          // ID del dispositivo Android asociado
   status        WorkerStatus @default(OFFLINE)
   lastHeartbeat DateTime?
   ip            String?
