@@ -172,7 +172,7 @@ export async function getWorkerById(workerId: string) {
  */
 export async function getWorkerByApiKey(apiKey: string) {
   try {
-    const worker = await prisma.worker.findUnique({
+    const worker = await prisma.worker.findFirst({
       where: { apiKey },
       include: {
         device: true,
