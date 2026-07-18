@@ -183,7 +183,7 @@ export const TramitesManagement: React.FC = () => {
         <Card className="bg-blue-50 border-blue-200">
           <div className="text-center">
             <div className="text-3xl font-bold text-blue-600">
-              {filteredTramites.filter(t => t.estado === 'en_proceso').length}
+              {filteredTramites.filter(t => t.estado === 'procesando').length}
             </div>
             <div className="text-sm text-blue-700 font-medium mt-1">En Proceso</div>
           </div>
@@ -236,9 +236,9 @@ export const TramitesManagement: React.FC = () => {
                         {new Date(tramite.fechaCreacion).toLocaleString('es-ES')}
                       </div>
                     </div>
-                    {tramite.errorMensaje && (
+                    {(tramite.mensajeCorreccion || tramite.resultado) && (
                       <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-                        <span className="font-medium">Error:</span> {tramite.errorMensaje}
+                        <span className="font-medium">Error:</span> {tramite.mensajeCorreccion || tramite.resultado}
                       </div>
                     )}
                   </div>

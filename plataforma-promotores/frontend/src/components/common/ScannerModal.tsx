@@ -59,7 +59,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
         html5QrCode.start(
           { facingMode: 'environment' },
           config,
-          (decodedText: string, decodedResult: any) => {
+          (decodedText: string) => {
             if (detectedRef.current) return;
 
             // Limpiar el código

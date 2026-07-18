@@ -119,25 +119,6 @@ services:
     networks:
       - movistar-network
 
-  # ============================================
-  # Nginx - Reverse Proxy (Opcional)
-  # ============================================
-  nginx:
-    image: nginx:alpine
-    container_name: movistar-nginx
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
-    ports:
-      - "443:443"
-      - "8443:8443"
-    depends_on:
-      - backend
-      - frontend
-    restart: unless-stopped
-    networks:
-      - movistar-network
-
 volumes:
   postgres_data:
     driver: local

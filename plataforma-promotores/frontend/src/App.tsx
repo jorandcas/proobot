@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { Login } from './pages/Login';
 import { DashboardPromotor } from './pages/DashboardPromotor';
-import { DashboardAdmin } from './pages/DashboardAdmin';
+
 import { FormTramite } from './pages/FormTramite';
 import { EditarTramite } from './pages/EditarTramite';
 import { AdminLayout } from './components/admin/AdminLayout';

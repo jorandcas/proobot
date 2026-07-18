@@ -93,7 +93,7 @@ async function createUser() {
   console.log('║          CREAR USUARIO                                    ║');
   console.log('╚════════════════════════════════════════════════════════════╝\n');
 
-  const tipo = await question('Tipo de usuario (ADMIN/PROMOTOR): ').toUpperCase();
+  const tipo = (await question('Tipo de usuario (ADMIN/PROMOTOR): ')).toUpperCase();
 
   if (tipo !== 'ADMIN' && tipo !== 'PROMOTOR') {
     console.error('\n❌ Error: Tipo debe ser ADMIN o PROMOTOR\n');

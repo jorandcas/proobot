@@ -292,7 +292,7 @@ export async function completeJobHandler(req: Request, res: Response) {
     }
 
     // Completar el trabajo
-    const job = await completeJob(id, folioId);
+    const job = await completeJob(id, folioId, logs);
 
     // Crear evidencia si se proporcionó
     if (logs || screenshots || metadata) {
@@ -339,7 +339,7 @@ export async function failJobHandler(req: Request, res: Response) {
     }
 
     // Marcar como fallido
-    const job = await failJob(id, errorMessage);
+    const job = await failJob(id, errorMessage, logs);
 
     // Crear evidencia si se proporcionó
     if (logs || screenshots) {

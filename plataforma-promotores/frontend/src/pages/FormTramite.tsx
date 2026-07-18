@@ -39,10 +39,10 @@ export const FormTramite: React.FC = () => {
         setIsLoadingFVC(true);
         const response = await apiService.getFVCFechas();
         if (response.data.success) {
-          setFvcOptions(response.data.data);
-          // Seleccionar la primera fecha por defecto
-          if (response.data.data.length > 0) {
-            setFormData((prev) => ({ ...prev, fvcFecha: response.data.data[0].fecha }));
+          setFvcOptions(response.data.data || []);
+          const data = response.data.data || [];
+          if (data.length > 0) {
+            setFormData((prev) => ({ ...prev, fvcFecha: data[0].fecha }));
           }
         }
       } catch (err) {

@@ -15,7 +15,6 @@ interface EnvConfig {
   botTimeout: number;
   botRetryAttempts: number;
   botRetryDelay: number;
-  dbPath: string;
 }
 
 const config: EnvConfig = {
@@ -29,7 +28,6 @@ const config: EnvConfig = {
   botTimeout: parseInt(process.env.BOT_TIMEOUT || '300000', 10), // 5 minutes default
   botRetryAttempts: parseInt(process.env.BOT_RETRY_ATTEMPTS || '3', 10),
   botRetryDelay: parseInt(process.env.BOT_RETRY_DELAY || '5000', 10),
-  dbPath: process.env.DB_PATH || './src/data/database.json',
 };
 
 export default config;

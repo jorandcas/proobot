@@ -1,4 +1,3 @@
-import { db } from '../config/database';
 import { usuarioModel } from '../models/usuario.model';
 import { PasswordUtil } from '../utils/password.util';
 import config from '../config/env';

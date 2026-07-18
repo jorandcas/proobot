@@ -75,13 +75,13 @@ export const DashboardPromotor: React.FC = () => {
       if (tramitesRes.data.success) {
         console.log('✅ [FRONTEND DEBUG] Trámites guardados:', tramitesRes.data.data);
         console.log('✅ [FRONTEND DEBUG] Tipo de tramitesRes.data.data:', Array.isArray(tramitesRes.data.data));
-        setTramites(tramitesRes.data.data);
+        setTramites(tramitesRes.data.data || []);
       } else {
         console.error('❌ [FRONTEND] Error en trámites response:', tramitesRes.data);
       }
       if (campanasRes.data.success) {
         console.log('✅ [FRONTEND] Campañas guardadas:', campanasRes.data.data);
-        setCampanas(campanasRes.data.data);
+        setCampanas(campanasRes.data.data || []);
       }
     } catch (error) {
       console.error('❌ [FRONTEND] Error loading data:', error);
@@ -201,10 +201,10 @@ export const DashboardPromotor: React.FC = () => {
   }
 
   const statsCards = stats ? [
-    { title: 'Completados', value: stats.completados || 0, color: 'text-green-600', bg: 'bg-green-50' },
-    { title: 'Pendientes', value: stats.pendientes || 0, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { title: 'Errores', value: stats.errores || 0, color: 'text-red-600', bg: 'bg-red-50' },
-    { title: 'Total', value: stats.total || 0, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { title: 'Completados', value: stats.porEstado.completado || 0, color: 'text-green-600', bg: 'bg-green-50' },
+    { title: 'Pendientes', value: stats.porEstado.pendiente || 0, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { title: 'Errores', value: stats.porEstado.error || 0, color: 'text-red-600', bg: 'bg-red-50' },
+    { title: 'Total Hoy', value: stats.totalHoy || 0, color: 'text-blue-600', bg: 'bg-blue-50' },
   ] : [];
 
   return (
@@ -251,7 +251,7 @@ export const DashboardPromotor: React.FC = () => {
               <p className="text-gray-600 mt-1">Gestiona y consulta el historial completo</p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={handleExport}>
+              <Button variant="secondary" onClick={handleExport}>
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
@@ -383,11 +383,7 @@ export const DashboardPromotor: React.FC = () => {
 
         {/* Table */}
         <Card>
-          {console.log('📋 [FRONTEND] A punto de renderizar Table con:', {
-            filteredLength: filteredTramites.length,
-            filteredData: filteredTramites,
-            isLoading
-          })}
+          {null}
           <Table
             columns={[
               { key: 'fechaCreacion', label: 'Fecha', render: (value: any) => new Date(value).toLocaleDateString('es-ES') },
@@ -395,7 +391,7 @@ export const DashboardPromotor: React.FC = () => {
               {
                 key: 'nombre',
                 label: 'Cliente',
-                render: (value: any, row: any) => `${row.nombre || ''} ${row.apellidoPaterno || ''}`.trim() || '-'
+                render: (_value: any, row: any) => `${row.nombre || ''} ${row.apellidoPaterno || ''}`.trim() || '-'
               },
               { key: 'icc', label: 'ICC' },
               {

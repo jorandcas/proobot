@@ -5,6 +5,7 @@ import { prisma } from '../config/database.prisma';
 // Tipos de datos para los jobs
 export interface PortabilityJobData {
   tramiteId: string;
+  jobId?: string;
   priority?: number;
   maxRetries?: number;
 }
@@ -214,7 +215,7 @@ export async function startJob(jobId: string) {
 /**
  * Completar un trabajo exitosamente
  */
-export async function completeJob(jobId: string, folioId: string) {
+export async function completeJob(jobId: string, folioId: string, workerLogs?: string[]) {
   try {
     const job = await prisma.job.update({
       where: { id: jobId },
@@ -238,6 +239,9 @@ export async function completeJob(jobId: string, folioId: string) {
       },
     });
 
+    // Actualizar BotLog y liberar dispositivo
+    await updateBotLogAndDevice(job.tramiteId, 'EXITOSO', workerLogs);
+
     // Actualizar estado del worker a ONLINE
     if (job.workerId) {
       await prisma.worker.update({
@@ -258,7 +262,7 @@ export async function completeJob(jobId: string, folioId: string) {
 /**
  * Marcar trabajo como fallido
  */
-export async function failJob(jobId: string, errorMessage: string) {
+export async function failJob(jobId: string, errorMessage: string, workerLogs?: string[]) {
   try {
     const job = await prisma.job.findUnique({
       where: { id: jobId },
@@ -302,6 +306,9 @@ export async function failJob(jobId: string, errorMessage: string) {
         },
       });
     }
+
+    // Actualizar BotLog y liberar dispositivo
+    await updateBotLogAndDevice(job.tramiteId, 'FALLIDO', workerLogs, errorMessage);
 
     // Actualizar estado del worker
     if (updatedJob.workerId) {
@@ -412,6 +419,56 @@ export async function cleanOldJobs(maxAge = 7 * 24 * 60 * 60 * 1000) { // 7 día
   } catch (error) {
     console.error('Error cleaning old jobs:', error);
     throw error;
+  }
+}
+
+/**
+ * Actualizar BotLog y liberar dispositivo asociado a un trámite
+ */
+async function updateBotLogAndDevice(
+  tramiteId: string,
+  estado: 'EXITOSO' | 'FALLIDO',
+  workerLogs?: string[],
+  errorMessage?: string
+) {
+  try {
+    const botLog = await prisma.botLog.findFirst({
+      where: { idTramite: tramiteId },
+      orderBy: { fechaInicio: 'desc' },
+    });
+
+    if (!botLog) {
+      console.warn(`⚠️  No se encontró BotLog para trámite ${tramiteId}`);
+      return;
+    }
+
+    const updateData: any = {
+      estado,
+      fechaFin: new Date(),
+    };
+
+    if (workerLogs && workerLogs.length > 0) {
+      updateData.logs = [...(botLog.logs || []), ...workerLogs.map(
+        log => `[${new Date().toISOString()}] [WORKER] ${log}`
+      )];
+    }
+
+    if (errorMessage) {
+      updateData.error = errorMessage;
+    }
+
+    await prisma.botLog.update({
+      where: { id: botLog.id },
+      data: updateData,
+    });
+
+    // Liberar dispositivo
+    await prisma.device.update({
+      where: { id: botLog.idDevice },
+      data: { status: 'AVAILABLE' },
+    });
+  } catch (error) {
+    console.error(`Error updating BotLog/Device for tramite ${tramiteId}:`, error);
   }
 }
 

@@ -10,7 +10,8 @@
     "dev": "ts-node src/main.ts",
     "build": "npm run build --workspaces",
     "build:packages": "npm run build --workspaces --if-present",
-    "start": "node dist/main.js"
+    "start": "node dist/main.js",
+    "verify": "bash scripts/verify.sh"
   },
   "keywords": ["automation", "portability", "movistar", "onix"],
   "author": "",

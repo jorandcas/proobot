@@ -18,9 +18,12 @@ poc-login/
 │   ├── core/                    # Retry, UI Helpers, Date Helpers
 │   └── flows/                   # Flujos de automatización
 ├── src/                         # Bot principal
-├── bot-worker/                  # Worker API (Hetzner)
-├── worker-agent/                # Agente local (Admin Office)
+├── worker-agent/                # Agente local (PC Admin)
 ├── plataforma-promotores/       # Web para promotores
+│   ├── backend/                 # API REST (Express + Prisma + PostgreSQL)
+│   └── frontend/                # SPA React (Vite + TailwindCSS)
+├── scripts/                     # Scripts de utilidad
+│   └── verify.sh               # Verificación integral
 └── docs/                        # Documentación detallada
 ```
 
@@ -119,13 +122,23 @@ npm run dev              # Ejecutar bot principal
 npm run build            # Compilar todos los packages
 npm run build:packages   # Compilar solo packages
 npm start                # Ejecutar compilado
+npm run verify           # Verificación integral del sistema
 ```
 
 ## 📖 Documentación Detallada
 
-- **ARQUITECTURA.md** - Arquitectura técnica detallada
-- **GUIA-ADMIN.md** - Guía del administrador
-- **COMANDOS-UTILES.md** - Comandos útiles de desarrollo
+| Documento | Descripción |
+|-----------|-------------|
+| [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) | Arquitectura técnica de dos capas (Nube + Nodo Local) |
+| [`docs/API.md`](docs/API.md) | Referencia completa de la API REST |
+| [`docs/MODELO-DATOS.md`](docs/MODELO-DATOS.md) | Modelo de datos (Prisma schema, entidades, relaciones) |
+| [`docs/FLUJO-BOT.md`](docs/FLUJO-BOT.md) | Flujo de automatización del bot (10 pasos) |
+| [`docs/GUIA-ADMIN.md`](docs/GUIA-ADMIN.md) | Guía del administrador (setup local) |
+| [`docs/GUIA-PROMOTOR.md`](docs/GUIA-PROMOTOR.md) | Guía del promotor (uso de la plataforma web) |
+| [`docs/FRONTEND.md`](docs/FRONTEND.md) | Componentes y páginas del frontend React |
+| [`docs/DEPLOY-COOLIFY.md`](docs/DEPLOY-COOLIFY.md) | Despliegue en Coolify (producción) |
+| [`docs/SETUP-ON-PREMISE.md`](docs/SETUP-ON-PREMISE.md) | Configuración del worker agent local |
+| [`docs/COMANDOS-UTILES.md`](docs/COMANDOS-UTILES.md) | Comandos útiles de desarrollo y operación |
 
 ## 🔍 Verificación de Dispositivos
 

@@ -35,7 +35,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend, color })
 );
 
 export const DashboardOverview: React.FC = () => {
-  const [stats, setStats] = useState<DashboardAdminStats | null>(null);
+  const [stats] = useState<DashboardAdminStats | null>(null);
   const [allTramites, setAllTramites] = useState<any[]>([]);
   const [filteredStats, setFilteredStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -92,7 +92,6 @@ export const DashboardOverview: React.FC = () => {
     const pendientes = filtered.filter(t => t.estado === 'PENDIENTE').length;
     const completados = filtered.filter(t => t.estado === 'COMPLETADO').length;
     const errores = filtered.filter(t => t.estado === 'ERROR').length;
-    const procesando = filtered.filter(t => t.estado === 'PROCESANDO').length;
 
     // Calcular stats por fecha
     const today_start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -288,7 +287,7 @@ export const DashboardOverview: React.FC = () => {
             </div>
             <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-100">
               <span className="font-semibold text-gray-700">En Proceso</span>
-              <span className="text-2xl font-bold text-blue-600">{displayStats.procesando}</span>
+              <span className="text-2xl font-bold text-blue-600">{(displayStats as any).procesando || 0}</span>
             </div>
           </div>
         </Card>

@@ -9,7 +9,6 @@ interface EnvConfig {
     botTimeout: number;
     botRetryAttempts: number;
     botRetryDelay: number;
-    dbPath: string;
 }
 declare const config: EnvConfig;
 export default config;

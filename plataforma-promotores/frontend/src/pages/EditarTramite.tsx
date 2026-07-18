@@ -74,7 +74,7 @@ export const EditarTramite: React.FC = () => {
         // Cargar fechas FVC
         const fvcResponse = await apiService.getFVCFechas();
         if (fvcResponse.data.success) {
-          setFvcOptions(fvcResponse.data.data);
+          setFvcOptions(fvcResponse.data.data || []);
         }
       } catch (err) {
         console.error('Error cargando datos:', err);
@@ -452,7 +452,7 @@ export const EditarTramite: React.FC = () => {
         <ScannerModal
           isOpen={scanningICC}
           onClose={handleCloseScanner}
-          onCodeDetected={handleICCScanned}
+          onScan={handleICCScanned}
         />
       </main>
     </div>
