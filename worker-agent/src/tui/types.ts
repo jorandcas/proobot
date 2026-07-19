@@ -1,25 +1,5 @@
 import type * as blessed from 'blessed';
 
-import type * as blessed from 'blessed';
-
-import type * as blessed from 'blessed';
-
-import type * as blessed from 'blessed';
-
-import type * as blessed from 'blessed';
-
-import type * as blessed from 'blessed';
-
-import type * as blessed from 'blessed';
-
-import type * as blessed from 'blessed';
-
-import type * as blessed from 'blessed';
-
-import type * as blessed from 'blessed';
-
-import type * as blessed from 'blessed';
-
 export type ScreenType = 'dashboard' | 'config' | 'history';
 
 export interface ScreenProps {
