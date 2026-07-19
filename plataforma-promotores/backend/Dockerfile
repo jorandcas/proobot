@@ -27,6 +27,6 @@ COPY --from=builder /app/dist/ ./dist/
 EXPOSE 3001
 
 HEALTHCHECK --interval=15s --timeout=5s --retries=3 \
-  CMD curl -sf http://localhost:3001/health || exit 1
+  CMD curl -sf http://localhost:3000/health || exit 1
 
 CMD ["sh", "-c", "echo 'Esperando base de datos...' && for i in $(seq 1 30); do npx prisma migrate deploy && break; echo \"  intento $i/30...\"; sleep 2; done && echo 'Iniciando servidor...' && node dist/server.js"]
