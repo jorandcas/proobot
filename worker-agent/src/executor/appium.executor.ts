@@ -26,6 +26,7 @@ export class AppiumExecutor extends EventEmitter {
   private logs: string[] = [];
 
   constructor() {
+    super();
     this.evidencePath = path.join(process.cwd(), config.evidencePath);
     this.ensureEvidenceDir();
   }

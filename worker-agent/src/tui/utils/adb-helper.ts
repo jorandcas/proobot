@@ -23,7 +23,7 @@ export class AdbHelper {
           if (parts.length < 2) continue;
 
           const id = parts[0];
-          const status = parts[1] as DeviceInfo['status'];
+          const status = parts[1];
 
           if (status === 'device' || status === 'unauthorized') {
             devices.push({

@@ -75,7 +75,7 @@ export class WorkerAgent {
       this.apiClient.setApiKey(apiKey);
 
       // Emitir evento de registro
-      workerEvents.emit('worker:registered', { workerId: this.workerId, apiKey });
+      workerEvents.emit('worker:registered', { workerId: this.workerId || '', apiKey });
       workerEvents.emit('worker:online');
 
       logger.info(`Worker registered successfully: ${this.workerId}`);
