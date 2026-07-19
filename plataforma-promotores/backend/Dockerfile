@@ -17,6 +17,7 @@ WORKDIR /app
 RUN apk add --no-cache tzdata curl
 
 COPY package*.json ./
+COPY prisma.config.ts ./
 RUN npm ci --omit=dev
 
 COPY prisma/ ./prisma/
