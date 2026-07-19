@@ -85,7 +85,7 @@ export function createConfigScreen(parentScreen: blessed.Widgets.Screen): blesse
   return screen;
 }
 
-function createFormFields(form: blessed.Widgets.FormElement, screen: blessed.Widgets.Screen) {
+function createFormFields(form: blessed.Widgets.FormElement<any>, screen: blessed.Widgets.Screen) {
   const startY = 2;
   const labelWidth = 25;
   const fieldWidth = 50;
