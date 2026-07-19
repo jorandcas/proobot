@@ -7,6 +7,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "verify": "tsc --noEmit && npx prisma validate",
     "init-db": "ts-node src/utils/init-db.ts",
     "get-ip": "node ../get-ip.js",
     "prisma:generate": "prisma generate",
