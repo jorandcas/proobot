@@ -62,7 +62,20 @@ function Install-Node {
         # Intentar con winget
         winget install OpenJS.NodeJS.LTS --silent --accept-package-agreements --accept-source-agreements
         Write-Success "Node.js instalado correctamente"
-        return $true
+        
+        # Refrescar el PATH de la sesión actual
+        Write-Info "Actualizando variables de entorno..."
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        
+        # Verificar que npm esté disponible
+        Start-Sleep -Seconds 2
+        if (Test-Node) {
+            return $true
+        } else {
+            Write-Warning "npm no está en el PATH. Cierra y vuelve a abrir PowerShell, luego ejecuta este script nuevamente."
+            Write-Info "O agrega manualmente: `$env:Path += ';C:\Program Files\nodejs'"
+            return $false
+        }
     } catch {
         Write-Error "Error al instalar Node.js con winget"
         Write-Info "Instala Node.js manualmente desde: https://nodejs.org/"
@@ -104,7 +117,17 @@ function Install-Git {
     try {
         winget install Git.Git --silent --accept-package-agreements --accept-source-agreements
         Write-Success "Git instalado correctamente"
-        return $true
+        
+        # Refrescar el PATH
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+        Start-Sleep -Seconds 2
+        
+        if (Test-Git) {
+            return $true
+        } else {
+            Write-Warning "Git no está en el PATH. Cierra y vuelve a abrir PowerShell."
+            return $false
+        }
     } catch {
         Write-Error "Error al instalar Git"
         return $false
@@ -154,6 +177,14 @@ function Download-Worker {
 # Instalar dependencias
 function Install-Dependencies {
     Write-Info "Instalando dependencias..."
+    
+    # Verificar que npm esté disponible
+    if (-not (Test-Node)) {
+        Write-Error "npm no está disponible. Cierra PowerShell, ábrelo de nuevo y ejecuta este script otra vez."
+        Write-Info "O ejecuta manualmente: `$env:Path += ';C:\Program Files\nodejs'"
+        exit 1
+    }
+    
     Set-Location "$InstallDir\worker-agent"
 
     npm install
