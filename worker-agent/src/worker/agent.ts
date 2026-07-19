@@ -2,6 +2,7 @@ import config from '../config/env';
 import logger from '../utils/logger';
 import ApiClient from '../client/api.client';
 import AppiumExecutor, { BotExecutionResult } from '../executor/appium.executor';
+import { workerEvents, JobInfo, DeviceInfo } from '../events/worker-events';
 
 /**
  * Worker Agent - Agente principal que ejecuta en nodos locales
@@ -73,10 +74,15 @@ export class WorkerAgent {
       // Actualizar API key del cliente
       this.apiClient.setApiKey(apiKey);
 
+      // Emitir evento de registro
+      workerEvents.emit('worker:registered', { workerId: this.workerId, apiKey });
+      workerEvents.emit('worker:online');
+
       logger.info(`Worker registered successfully: ${this.workerId}`);
       logger.info('API key received and configured');
     } catch (error) {
       logger.error('Error registering worker:', error);
+      workerEvents.emit('worker:error', error instanceof Error ? error.message : 'Registration failed');
       throw error;
     }
   }
@@ -94,9 +100,12 @@ export class WorkerAgent {
         if (this.workerId) {
           await this.apiClient.sendHeartbeat(this.workerId);
           logger.debug('Heartbeat sent successfully');
+          workerEvents.emit('backend:connected');
         }
       } catch (error) {
         logger.error('Error sending heartbeat:', error);
+        workerEvents.emit('backend:disconnected');
+        workerEvents.emit('backend:reconnecting');
         // Si falla el heartbeat, intentar reconectar
         await this.handleConnectionError();
       }
@@ -139,7 +148,15 @@ export class WorkerAgent {
       }
 
       const job = response.job;
+      const jobInfo: JobInfo = {
+        id: job.id,
+        tramiteId: job.tramiteId,
+        status: 'received',
+        message: 'Trabajo recibido',
+      };
+
       logger.info(`📋 New job received: ${job.id} (Trámite: ${job.tramiteId})`);
+      workerEvents.emit('job:received', jobInfo);
 
       // Procesar trabajo
       await this.processJob(job);
@@ -154,18 +171,45 @@ export class WorkerAgent {
   private async processJob(job: any) {
     this.currentJob = job;
 
+    const jobInfo: JobInfo = {
+      id: job.id,
+      tramiteId: job.tramiteId,
+      status: 'started',
+      progress: 0,
+      message: 'Iniciando ejecución...',
+      startedAt: new Date(),
+    };
+
     try {
       logger.info(`▶️  Starting job ${job.id}...`);
+      workerEvents.emit('job:started', job.id);
 
       // Marcar como iniciado
       await this.apiClient.startJob(job.id);
 
+      // Escuchar eventos del executor para progreso
+      const executor = this.executor;
+      const onProgress = (data: { jobId: string; progress: number; message: string }) => {
+        workerEvents.emit('job:progress', data);
+      };
+      executor.on('progress', onProgress);
+
       // Ejecutar bot
-      const result = await this.executor.executeJob(job);
+      const result = await this.executeJobWithProgress(job, jobInfo);
+
+      // Limpiar listener
+      executor.off('progress', onProgress);
 
       if (result.success) {
         // Completar trabajo exitosamente
+        jobInfo.status = 'completed';
+        jobInfo.folioId = result.folioId;
+        jobInfo.progress = 100;
+        jobInfo.message = 'Completado exitosamente';
+        jobInfo.completedAt = new Date();
+
         logger.info(`✅ Job ${job.id} completed successfully. FolioID: ${result.folioId}`);
+        workerEvents.emit('job:completed', { jobId: job.id, folioId: result.folioId || '' });
 
         await this.apiClient.completeJob(job.id, {
           folioId: result.folioId || '',
@@ -175,7 +219,13 @@ export class WorkerAgent {
         });
       } else {
         // Marcar como fallido
+        jobInfo.status = 'failed';
+        jobInfo.error = result.error;
+        jobInfo.message = `Fallido: ${result.error}`;
+        jobInfo.completedAt = new Date();
+
         logger.error(`❌ Job ${job.id} failed: ${result.error}`);
+        workerEvents.emit('job:failed', { jobId: job.id, error: result.error || 'Unknown error' });
 
         await this.apiClient.failJob(job.id, {
           error: result.error || 'Unknown error',
@@ -184,7 +234,16 @@ export class WorkerAgent {
         });
       }
     } catch (error) {
+      jobInfo.status = 'failed';
+      jobInfo.error = error instanceof Error ? error.message : 'Unknown error';
+      jobInfo.message = `Error: ${jobInfo.error}`;
+      jobInfo.completedAt = new Date();
+
       logger.error(`Error processing job ${job.id}:`, error);
+      workerEvents.emit('job:failed', {
+        jobId: job.id,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
 
       try {
         await this.apiClient.failJob(job.id, {
@@ -198,6 +257,19 @@ export class WorkerAgent {
     } finally {
       this.currentJob = null;
     }
+  }
+
+  private async executeJobWithProgress(job: any, jobInfo: JobInfo): Promise<BotExecutionResult> {
+    // Actualizar progreso inicial
+    workerEvents.emit('job:progress', { jobId: job.id, progress: 10, message: 'Preparando datos...' });
+
+    // Ejecutar el executor con eventos de progreso
+    const result = await this.executor.executeJob(job);
+
+    // Actualizar progreso final
+    workerEvents.emit('job:progress', { jobId: job.id, progress: 100, message: 'Finalizando...' });
+
+    return result;
   }
 
   /**
@@ -225,6 +297,7 @@ export class WorkerAgent {
     logger.info('Stopping worker agent...');
 
     this.isRunning = false;
+    workerEvents.emit('worker:offline');
 
     // Detener heartbeat
     if (this.heartbeatInterval) {
