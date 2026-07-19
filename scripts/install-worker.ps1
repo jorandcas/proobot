@@ -109,6 +109,44 @@ function Test-Adb {
     return $false
 }
 
+# Instalar ADB automáticamente
+function Install-Adb {
+    Write-Info "Instalando ADB automáticamente..."
+    try {
+        $zipPath = "$env:TEMP\platform-tools.zip"
+        $extractPath = "$InstallDir\platform-tools"
+
+        Write-Info "Descargando Platform Tools desde Google..."
+        Invoke-WebRequest -Uri "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -OutFile $zipPath -UseBasicParsing
+
+        Write-Info "Extrayendo..."
+        Expand-Archive -Path $zipPath -DestinationPath $InstallDir -Force
+
+        Remove-Item $zipPath -Force
+
+        # Agregar al PATH del sistema (User)
+        $adbPath = "$extractPath"
+        $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+        if ($userPath -notlike "*$adbPath*") {
+            [Environment]::SetEnvironmentVariable("Path", "$userPath;$adbPath", "User")
+        }
+        $env:Path += ";$adbPath"
+
+        Write-Success "ADB instalado en $adbPath"
+
+        if (Test-Adb) {
+            return $true
+        } else {
+            Write-Warning "ADB instalado pero no en el PATH de esta sesión. Cierra y abre PowerShell de nuevo."
+            return $false
+        }
+    } catch {
+        Write-Error "Error al instalar ADB automáticamente: $_"
+        Write-Warning "Instálalo manualmente desde: https://developer.android.com/studio/releases/platform-tools"
+        return $false
+    }
+}
+
 # Verificar Git
 function Test-Git {
     try {
@@ -403,9 +441,11 @@ function Main {
         Install-Git
     }
 
-    # Paso 3: Verificar ADB
+    # Paso 3: Verificar/Instalar ADB
     Write-Step 3 "Verificando ADB"
-    Test-Adb
+    if (-not (Test-Adb)) {
+        Install-Adb
+    }
 
     # Paso 4: Descargar worker
     Write-Step 4 "Descargando worker agent"
