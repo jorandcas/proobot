@@ -178,16 +178,57 @@ function Download-Worker {
 function Install-Dependencies {
     Write-Info "Instalando dependencias..."
     
-    # Verificar que npm esté disponible
+    # Verificar que npm esté disponible, intentar reparar si no lo está
     if (-not (Test-Node)) {
-        Write-Error "npm no está disponible. Cierra PowerShell, ábrelo de nuevo y ejecuta este script otra vez."
-        Write-Info "O ejecuta manualmente: `$env:Path += ';C:\Program Files\nodejs'"
-        exit 1
+        Write-Warning "npm no está en el PATH. Intentando reparar automáticamente..."
+        
+        # Rutas comunes de Node.js en Windows
+        $nodePaths = @(
+            "C:\Program Files\nodejs",
+            "C:\Program Files (x86)\nodejs",
+            "$env:LOCALAPPDATA\nodejs",
+            "$env:APPDATA\npm"
+        )
+        
+        $pathFixed = $false
+        foreach ($nodePath in $nodePaths) {
+            if (Test-Path "$nodePath\npm.cmd") {
+                Write-Info "Encontrado Node.js en: $nodePath"
+                $env:Path += ";$nodePath"
+                $pathFixed = $true
+                break
+            }
+        }
+        
+        if (-not $pathFixed) {
+            # Intentar refrescar el PATH completo desde el registro
+            Write-Info "Intentando refrescar PATH desde el sistema..."
+            $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+            Start-Sleep -Seconds 2
+        }
+        
+        # Verificar de nuevo
+        if (-not (Test-Node)) {
+            Write-Error "No se pudo encontrar npm automáticamente."
+            Write-Info "Solución manual:"
+            Write-Info "1. Cierra PowerShell completamente"
+            Write-Info "2. Ábrelo de nuevo como Administrador"
+            Write-Info "3. Ejecuta este script otra vez"
+            Write-Info ""
+            Write-Info "O ejecuta manualmente:"
+            Write-Info "`$env:Path += ';C:\Program Files\nodejs'"
+            exit 1
+        }
+        
+        Write-Success "PATH reparado correctamente"
     }
     
     Set-Location "$InstallDir\worker-agent"
 
+    Write-Info "Instalando dependencias del worker..."
     npm install
+    
+    Write-Info "Instalando Appium globalmente..."
     npm install -g appium
 
     Write-Success "Dependencias instaladas"
