@@ -5,6 +5,18 @@
 # Uso: irm https://raw.githubusercontent.com/jorandcas/proobot/master/scripts/install-worker.ps1 | iex
 # ============================================================================
 
+# Fix: Ajustar política de ejecución para permitir npm y scripts
+try {
+    $currentPolicy = Get-ExecutionPolicy -Scope CurrentUser -ErrorAction SilentlyContinue
+    if ($currentPolicy -eq 'Restricted' -or $currentPolicy -eq 'Undefined') {
+        Write-Host "Ajustando política de ejecución de PowerShell..." -ForegroundColor Cyan
+        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    }
+} catch {
+    # Si falla, intentar con Process scope (no requiere admin)
+    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
+}
+
 # Configuración de colores
 $Host.UI.RawUI.ForegroundColor = "White"
 
