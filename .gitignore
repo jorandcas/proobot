@@ -11,6 +11,8 @@ dist/
 *.js
 *.js.map
 !src/**/*.js
+!scripts/*.js
+!worker-agent/scripts/*.js
 
 # Logs
 *.log
