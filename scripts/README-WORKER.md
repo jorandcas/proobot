@@ -51,7 +51,8 @@ npm run kiosk
 |---------|-------------|
 | `npm start` | Iniciar worker con interfaz visual (TUI) |
 | `npm run kiosk` | Iniciar en modo kiosko (se reinicia automáticamente si falla) |
-| `npm run build` | Recompilar después de hacer cambios al código |
+| `npm run update` | **Actualizar todo**: git pull + install + build + start |
+| `npm run fix` | Instalar dependencias y compilar (si algo falla) |
 
 ---
 

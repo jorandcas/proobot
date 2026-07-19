@@ -357,7 +357,8 @@ function Start-Worker {
     Write-Info "Comandos disponibles:"
     Write-Host "  npm start      - Iniciar worker con TUI"
     Write-Host "  npm run kiosk  - Iniciar en modo kiosko (auto-reinicio)"
-    Write-Host "  npm run build  - Recompilar después de cambios"
+    Write-Host "  npm run update - Actualizar, compilar e iniciar (todo en uno)"
+    Write-Host "  npm run fix    - Instalar dependencias y compilar"
     Write-Host ""
 
     Write-Warning "Asegúrate de tener Appium corriendo antes de iniciar:"
