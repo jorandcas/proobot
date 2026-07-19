@@ -1,4 +1,4 @@
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
@@ -11,7 +11,7 @@ function isAppiumRunning() {
     const cmd = isWindows ? 'netstat' : 'lsof';
     const args = isWindows ? ['-ano'] : ['-i', ':4723'];
     
-    const proc = spawn(cmd, args);
+    const proc = spawn(cmd, args, { shell: isWindows });
     let output = '';
     
     proc.stdout.on('data', (data) => {
@@ -43,7 +43,8 @@ function startAppium() {
     const appium = spawn(cmd, args, {
       detached: true,
       stdio: 'ignore',
-      windowsHide: true
+      windowsHide: true,
+      shell: isWindows
     });
     
     appium.unref();
@@ -80,8 +81,7 @@ async function main() {
     // Verificar si dist existe
     if (!fs.existsSync(path.join(process.cwd(), 'dist', 'index.js'))) {
       console.log('⚠️  Código no compilado. Compilando...');
-      const { execSync } = require('child_process');
-      execSync('npm run build', { stdio: 'inherit' });
+      execSync('npm run build', { stdio: 'inherit', shell: process.platform === 'win32' });
     }
     
     // Verificar si Appium está corriendo
