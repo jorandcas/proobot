@@ -37,7 +37,19 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend, color })
 export const DashboardOverview: React.FC = () => {
   const [stats] = useState<DashboardAdminStats | null>(null);
   const [allTramites, setAllTramites] = useState<any[]>([]);
-  const [filteredStats, setFilteredStats] = useState<any>(null);
+  const [filteredStats, setFilteredStats] = useState<any>({
+    tramitesPendientes: 0,
+    exitoHoy: 0,
+    erroresHoy: 0,
+    tramitesHoy: 0,
+    tramitesSemana: 0,
+    tramitesMes: 0,
+    completados: 0,
+    errores: 0,
+    promotoresActivos: 0,
+    devicesAvailable: 0,
+    devicesBusy: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'all'>('month');
 
@@ -48,9 +60,7 @@ export const DashboardOverview: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (allTramites.length > 0) {
-      filterStatsByPeriod();
-    }
+    filterStatsByPeriod();
   }, [selectedPeriod, allTramites]);
 
   const loadData = async () => {
