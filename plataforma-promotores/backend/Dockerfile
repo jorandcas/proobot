@@ -18,7 +18,7 @@ RUN apk add --no-cache tzdata curl
 
 COPY package*.json ./
 COPY prisma.config.ts ./
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev && npm install -g ts-node typescript
 
 COPY prisma/ ./prisma/
 COPY --from=builder /app/node_modules/.prisma /app/node_modules/.prisma

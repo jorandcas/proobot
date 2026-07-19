@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../config/database.prisma';
 import bcrypt from 'bcryptjs';
 import readline from 'readline';
-
-const prisma = new PrismaClient();
 
 interface AdminData {
   nombre: string;
