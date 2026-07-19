@@ -28,23 +28,49 @@ function isAppiumRunning() {
   });
 }
 
+// Buscar un ejecutable en el PATH y devolver la ruta completa
+function findInPath(exe) {
+  try {
+    const isWindows = process.platform === 'win32';
+    const cmd = isWindows ? 'where' : 'which';
+    const result = execSync(`${cmd} ${exe}`, { encoding: 'utf8', timeout: 5000 });
+    const lines = result.trim().split('\n');
+    return lines[0].trim();
+  } catch {
+    return null;
+  }
+}
+
 // Iniciar Appium en segundo plano
 function startAppium() {
   return new Promise((resolve) => {
     console.log('📱 Iniciando Appium Server en segundo plano...');
     
     const isWindows = process.platform === 'win32';
-    const appiumPath = path.join(process.cwd(), 'node_modules', '.bin', isWindows ? 'appium.cmd' : 'appium');
+    const localAppium = path.join(process.cwd(), 'node_modules', '.bin', isWindows ? 'appium.cmd' : 'appium');
     
-    // Si no existe en node_modules, usar npx
-    const cmd = fs.existsSync(appiumPath) ? appiumPath : 'npx';
-    const args = fs.existsSync(appiumPath) ? [] : ['appium'];
+    // Intentar varias rutas para encontrar appium
+    let cmd = null;
+    let args = [];
+    
+    if (fs.existsSync(localAppium)) {
+      cmd = localAppium;
+    } else {
+      // Buscar appium en el PATH global (npm install -g appium)
+      const globalAppium = findInPath(isWindows ? 'appium.cmd' : 'appium');
+      if (globalAppium) {
+        cmd = globalAppium;
+      } else {
+        // Fallback a npx.cmd (Windows) o npx (Unix)
+        cmd = findInPath(isWindows ? 'npx.cmd' : 'npx') || 'npx';
+        args = ['appium'];
+      }
+    }
     
     const appium = spawn(cmd, args, {
       detached: true,
       stdio: 'ignore',
-      windowsHide: true,
-      shell: isWindows
+      windowsHide: true
     });
     
     appium.unref();
