@@ -33,6 +33,7 @@ const format = winston.format.combine(
 );
 
 let tuiCallback: ((level: string, message: string) => void) | null = null;
+let lastLogKey = '';
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
@@ -53,15 +54,14 @@ const logger = winston.createLogger({
   ],
 });
 
-// Redirigir logs a TUI sin duplicación
-const originalLog = logger.log.bind(logger);
-logger.log = function (...args: any[]) {
-  const info = args[0];
-  if (typeof info === 'object' && info.level && info.message && tuiCallback && info.level !== 'http') {
+// Escuchar logs una sola vez (deduplicar por timestamp+mensaje)
+logger.on('data', (info) => {
+  const key = `${info.timestamp}-${info.message}`;
+  if (key !== lastLogKey && tuiCallback && info.level !== 'http') {
+    lastLogKey = key;
     tuiCallback(info.level, info.message);
   }
-  return originalLog(...args);
-};
+});
 
 export function setTuiLogCallback(callback: (level: string, message: string) => void) {
   tuiCallback = callback;
