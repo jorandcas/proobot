@@ -84,20 +84,22 @@ function startAppium() {
 
 // Iniciar el worker
 function startWorker() {
-  console.log('🤖 Iniciando Worker Agent...');
-  
-  const worker = spawn('node', ['dist/index.js'], {
-    stdio: 'inherit',
-    cwd: process.cwd()
-  });
-  
-  worker.on('error', (err) => {
-    console.error('❌ Error al iniciar el worker:', err.message);
-    process.exit(1);
-  });
-  
-  worker.on('exit', (code) => {
-    process.exit(code);
+  return new Promise((resolve) => {
+    console.log('🤖 Iniciando Worker Agent...');
+    
+    const worker = spawn('node', ['dist/index.js'], {
+      stdio: 'inherit',
+      cwd: process.cwd()
+    });
+    
+    worker.on('error', (err) => {
+      console.error('❌ Error al iniciar el worker:', err.message);
+      resolve();
+    });
+    
+    worker.on('exit', (code) => {
+      resolve();
+    });
   });
 }
 
