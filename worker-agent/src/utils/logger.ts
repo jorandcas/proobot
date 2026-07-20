@@ -1,5 +1,4 @@
 import winston from 'winston';
-import { Writable } from 'stream';
 import path from 'path';
 import fs from 'fs';
 
@@ -33,36 +32,13 @@ const format = winston.format.combine(
   winston.format.json()
 );
 
-class TuiTransport extends Writable {
-  private callback: ((level: string, message: string) => void) | null = null;
-
-  _write(chunk: any, _encoding: string, callback: () => void) {
-    if (this.callback) {
-      try {
-        const info = typeof chunk === 'string' ? JSON.parse(chunk) : chunk;
-        if (info.level !== 'http') {
-          this.callback(info.level, info.message);
-        }
-      } catch {
-        // ignore
-      }
-    }
-    callback();
-  }
-
-  setCallback(cb: (level: string, message: string) => void) {
-    this.callback = cb;
-  }
-}
-
-const tuiTransport = new TuiTransport();
+let tuiCallback: ((level: string, message: string) => void) | null = null;
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   levels,
   format,
   transports: [
-    tuiTransport,
     new winston.transports.File({
       filename: path.join(logsDir, 'worker.log'),
       maxsize: 10485760,
@@ -77,8 +53,18 @@ const logger = winston.createLogger({
   ],
 });
 
+// Redirigir logs a TUI sin duplicación
+const originalLog = logger.log.bind(logger);
+logger.log = function (...args: any[]) {
+  const info = args[0];
+  if (typeof info === 'object' && info.level && info.message && tuiCallback && info.level !== 'http') {
+    tuiCallback(info.level, info.message);
+  }
+  return originalLog(...args);
+};
+
 export function setTuiLogCallback(callback: (level: string, message: string) => void) {
-  tuiTransport.setCallback(callback);
+  tuiCallback = callback;
 }
 
 export default logger;
