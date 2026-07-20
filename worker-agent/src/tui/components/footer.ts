@@ -24,18 +24,24 @@ export function updateFooter(
   screen: blessed.Widgets.Screen,
   currentScreen: string
 ): void {
+  const termWidth = screen.cols;
   let shortcuts = '';
 
   switch (currentScreen) {
     case 'dashboard':
-      shortcuts = '←→Cambiar pantalla  F5:Reiniciar worker  R:Reconectar dispositivo  Q:Salir';
+      shortcuts = '←→Pantallas  F5:Reiniciar  R:Reconectar  Q:Salir';
       break;
     case 'config':
-      shortcuts = 'Enter:Editar  Tab:Navegar  S:Guardar  Esc:Volver al dashboard';
+      shortcuts = 'Enter:Editar  Tab:Navegar  S:Guardar  Esc:Volver';
       break;
     case 'history':
-      shortcuts = '↑↓Navegar  Enter:Ver detalles  R:Reintentar  Esc:Volver al dashboard';
+      shortcuts = '↑↓Navegar  Enter:Detalles  R:Reintentar  Esc:Volver';
       break;
+  }
+
+  // Truncar si es necesario
+  if (shortcuts.length > termWidth - 4) {
+    shortcuts = shortcuts.substring(0, termWidth - 7) + '...';
   }
 
   footer.setContent(`  ${shortcuts}`);
