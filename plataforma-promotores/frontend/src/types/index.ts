@@ -2,6 +2,7 @@ export type UserRole = 'admin' | 'promotor';
 export type TramiteEstado = 'pendiente' | 'procesando' | 'completado' | 'error' | 'cancelado';
 export type TramiteEstadoVista = 'pendiente' | 'en_proceso' | 'completado';
 export type DeviceStatus = 'available' | 'busy' | 'offline';
+export type WorkerStatus = 'ONLINE' | 'BUSY' | 'OFFLINE' | 'ERROR';
 
 export interface Usuario {
   id: string;
@@ -137,4 +138,27 @@ export interface DashboardAdminStats {
   erroresHoy: number;
   ultimaEjecucion: BotExecution | null;
   promotoresActivos: number;
+}
+
+export interface Worker {
+  id: string;
+  name: string;
+  location: string;
+  status: WorkerStatus;
+  lastHeartbeat: string | null;
+  ip: string | null;
+  deviceId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  device?: Device | null;
+  jobs?: any[];
+}
+
+export interface WorkerStats {
+  total: number;
+  online: number;
+  busy: number;
+  offline: number;
+  error: number;
+  available: number;
 }

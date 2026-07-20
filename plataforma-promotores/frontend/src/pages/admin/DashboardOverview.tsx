@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/api';
-import { DashboardAdminStats } from '../../types';
+import { DashboardAdminStats, WorkerStats } from '../../types';
 import { Card } from '../../components/common/Card';
 
 interface StatCardProps {
@@ -36,6 +36,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend, color })
 
 export const DashboardOverview: React.FC = () => {
   const [stats] = useState<DashboardAdminStats | null>(null);
+  const [workerStats, setWorkerStats] = useState<WorkerStats | null>(null);
   const [allTramites, setAllTramites] = useState<any[]>([]);
   const [filteredStats, setFilteredStats] = useState<any>({
     tramitesPendientes: 0,
@@ -65,9 +66,15 @@ export const DashboardOverview: React.FC = () => {
 
   const loadData = async () => {
     try {
-      const response = await apiService.getRecentTramites(1000);
-      if (response.data.success && response.data.data) {
-        setAllTramites(response.data.data);
+      const [tramitesRes, workersRes] = await Promise.all([
+        apiService.getRecentTramites(1000),
+        apiService.getWorkerStats(),
+      ]);
+      if (tramitesRes.data.success && tramitesRes.data.data) {
+        setAllTramites(tramitesRes.data.data);
+      }
+      if (workersRes.data.success && workersRes.data.data) {
+        setWorkerStats(workersRes.data.data.stats);
       }
     } catch (error) {
       console.error('Error loading stats:', error);
@@ -237,6 +244,46 @@ export const DashboardOverview: React.FC = () => {
           color="text-indigo-600"
         />
       </div>
+
+      {/* Workers Status */}
+      {workerStats && (
+        <Card>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-900">Workers Conectados</h3>
+            <span className="text-sm text-gray-500">{workerStats.total} equipos</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-100">
+              <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
+              <div>
+                <p className="text-2xl font-bold text-green-700">{workerStats.online}</p>
+                <p className="text-xs text-green-600">En línea</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+              <div className="w-3 h-3 rounded-full bg-yellow-500" />
+              <div>
+                <p className="text-2xl font-bold text-yellow-700">{workerStats.busy}</p>
+                <p className="text-xs text-yellow-600">Ocupados</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-100">
+              <div className="w-3 h-3 rounded-full bg-red-500" />
+              <div>
+                <p className="text-2xl font-bold text-red-700">{workerStats.offline}</p>
+                <p className="text-xs text-red-600">Desconectados</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="w-3 h-3 rounded-full bg-gray-400" />
+              <div>
+                <p className="text-2xl font-bold text-gray-700">{workerStats.error}</p>
+                <p className="text-xs text-gray-600">Error</p>
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Detailed Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

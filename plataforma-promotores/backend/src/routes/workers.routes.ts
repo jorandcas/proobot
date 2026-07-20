@@ -17,6 +17,7 @@ import {
   healthCheckHandler,
 } from '../controllers/worker.controller';
 import { authenticateWorker, requireWorkerOnline, optionalWorkerAuth } from '../middleware/workerAuth.middleware';
+import { authMiddleware, adminMiddleware } from '../middleware/auth.middleware';
 
 const router = Router();
 
@@ -72,25 +73,22 @@ router.post('/jobs/:id/screenshots', authenticateWorker, upload.single('screensh
 // Rutas de administración (requieren autenticación de admin)
 // ============================================
 
-// NOTA: Estas rutas deberían tener middleware de autenticación de admin JWT
-// Por ahora se dejan sin protección para desarrollo
-
 // Obtener todos los workers
-router.get('/', getWorkersHandler);
+router.get('/', authMiddleware, adminMiddleware, getWorkersHandler);
 
 // Obtener estadísticas de workers
-router.get('/stats', getWorkersStatsHandler);
+router.get('/stats', authMiddleware, adminMiddleware, getWorkersStatsHandler);
 
 // Obtener worker por ID
-router.get('/:id', getWorkerHandler);
+router.get('/:id', authMiddleware, adminMiddleware, getWorkerHandler);
 
 // Actualizar worker
-router.patch('/:id', updateWorkerHandler);
+router.patch('/:id', authMiddleware, adminMiddleware, updateWorkerHandler);
 
 // Eliminar worker
-router.delete('/:id', deleteWorkerHandler);
+router.delete('/:id', authMiddleware, adminMiddleware, deleteWorkerHandler);
 
 // Obtener estadísticas de cola
-router.get('/queue/stats', getQueueStatsHandler);
+router.get('/queue/stats', authMiddleware, adminMiddleware, getQueueStatsHandler);
 
 export default router;

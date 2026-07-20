@@ -209,6 +209,16 @@ export const apiService = {
   addDevice: (udid: string, name: string) =>
     api.post<ApiResponse<any>>('/bot/devices', { udid, name }),
   deleteDevice: (id: string) => api.delete<ApiResponse>(`/bot/devices/${id}`),
+
+  // Workers
+  getWorkers: (status?: string) =>
+    api.get<ApiResponse<{ workers: any[] }>>('/workers', { params: { status } }),
+  getWorkerStats: () =>
+    api.get<ApiResponse<{ stats: { total: number; online: number; busy: number; offline: number; error: number; available: number } }>>('/workers/stats'),
+  getWorkerById: (id: string) =>
+    api.get<ApiResponse<{ worker: any }>>(`/workers/${id}`),
+  deleteWorker: (id: string) =>
+    api.delete<ApiResponse>(`/workers/${id}`),
 };
 
 // Helper function to handle API calls with toasts

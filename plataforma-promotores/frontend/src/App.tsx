@@ -10,6 +10,7 @@ import { AdminLayout } from './components/admin/AdminLayout';
 import { DashboardOverview } from './pages/admin/DashboardOverview';
 import { BotControl } from './pages/admin/BotControl';
 import { PromotoresManagement } from './pages/admin/PromotoresManagement';
+import { WorkersManagement } from './pages/admin/WorkersManagement';
 import { TramitesManagement } from './pages/admin/TramitesManagement';
 
 // Protected Route component
@@ -118,6 +119,16 @@ const App: React.FC = () => {
           <ProtectedRoute requiredRole="admin">
             <AdminLayout>
               <PromotoresManagement />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/workers"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminLayout>
+              <WorkersManagement />
             </AdminLayout>
           </ProtectedRoute>
         }
