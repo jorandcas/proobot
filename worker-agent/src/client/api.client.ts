@@ -59,7 +59,7 @@ export class ApiClient {
    */
   async registerWorker(data: { name: string; location: string; deviceId?: string }) {
     try {
-      const response = await this.client.post('/api/workers/register', data);
+      const response = await this.client.post('/workers/register', data);
       return response.data;
     } catch (error) {
       logger.error('Error registering worker:', error);
@@ -72,7 +72,7 @@ export class ApiClient {
    */
   async sendHeartbeat(workerId: string) {
     try {
-      const response = await this.client.put(`/api/workers/${workerId}/heartbeat`);
+      const response = await this.client.put(`/workers/${workerId}/heartbeat`);
       return response.data;
     } catch (error) {
       logger.error('Error sending heartbeat:', error);
@@ -85,7 +85,7 @@ export class ApiClient {
    */
   async getPendingJob() {
     try {
-      const response = await this.client.get('/api/workers/jobs/pending');
+      const response = await this.client.get('/workers/jobs/pending');
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 204) {
@@ -101,7 +101,7 @@ export class ApiClient {
    */
   async startJob(jobId: string) {
     try {
-      const response = await this.client.post(`/api/workers/jobs/${jobId}/start`);
+      const response = await this.client.post(`/workers/jobs/${jobId}/start`);
       return response.data;
     } catch (error) {
       logger.error(`Error starting job ${jobId}:`, error);
@@ -114,7 +114,7 @@ export class ApiClient {
    */
   async completeJob(jobId: string, data: { folioId: string; logs?: string[]; screenshots?: string[]; metadata?: any }) {
     try {
-      const response = await this.client.post(`/api/workers/jobs/${jobId}/complete`, data);
+      const response = await this.client.post(`/workers/jobs/${jobId}/complete`, data);
       return response.data;
     } catch (error) {
       logger.error(`Error completing job ${jobId}:`, error);
@@ -127,7 +127,7 @@ export class ApiClient {
    */
   async failJob(jobId: string, data: { error: string; logs?: string[]; screenshots?: string[] }) {
     try {
-      const response = await this.client.post(`/api/workers/jobs/${jobId}/fail`, data);
+      const response = await this.client.post(`/workers/jobs/${jobId}/fail`, data);
       return response.data;
     } catch (error) {
       logger.error(`Error failing job ${jobId}:`, error);
@@ -143,7 +143,7 @@ export class ApiClient {
       const form = new FormData();
       form.append('screenshot', fs.createReadStream(imagePath));
 
-      const response = await this.client.post(`/api/workers/jobs/${jobId}/screenshots`, form, {
+      const response = await this.client.post(`/workers/jobs/${jobId}/screenshots`, form, {
         headers: {
           ...form.getHeaders(),
         },
@@ -161,7 +161,7 @@ export class ApiClient {
    */
   async healthCheck() {
     try {
-      const response = await this.client.get('/api/workers/health');
+      const response = await this.client.get('/workers/health');
       return response.data;
     } catch (error) {
       logger.error('Error in health check:', error);
@@ -174,7 +174,7 @@ export class ApiClient {
    */
   async getQueueStats() {
     try {
-      const response = await this.client.get('/api/workers/queue/stats');
+      const response = await this.client.get('/workers/queue/stats');
       return response.data;
     } catch (error) {
       logger.error('Error getting queue stats:', error);
