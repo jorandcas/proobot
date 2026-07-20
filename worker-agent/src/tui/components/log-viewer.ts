@@ -9,7 +9,7 @@ export function createLogViewer(screen: blessed.Widgets.Screen): blessed.Widgets
     top: 16,
     left: 0,
     width: '100%',
-    height: '60%',
+    bottom: 3,
     tags: true,
     border: {
       type: 'line',
