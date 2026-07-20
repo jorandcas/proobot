@@ -1,4 +1,5 @@
 import winston from 'winston';
+import { Writable } from 'stream';
 import path from 'path';
 import fs from 'fs';
 
@@ -32,13 +33,19 @@ const format = winston.format.combine(
   winston.format.json()
 );
 
-// Transporte personalizado para TUI (evita duplicación por múltiples transports)
-class TuiTransport extends winston.Transport {
+class TuiTransport extends Writable {
   private callback: ((level: string, message: string) => void) | null = null;
 
-  log(info: any, callback: () => void) {
-    if (this.callback && info.level !== 'http') {
-      this.callback(info.level, info.message);
+  _write(chunk: any, _encoding: string, callback: () => void) {
+    if (this.callback) {
+      try {
+        const info = typeof chunk === 'string' ? JSON.parse(chunk) : chunk;
+        if (info.level !== 'http') {
+          this.callback(info.level, info.message);
+        }
+      } catch {
+        // ignore
+      }
     }
     callback();
   }
