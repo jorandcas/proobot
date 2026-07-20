@@ -36,24 +36,12 @@ const format = winston.format.combine(
   winston.format.json()
 );
 
-// Formato para consola
-const consoleFormat = winston.format.combine(
-  winston.format.colorize({ all: true }),
-  winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}` + (info.stack ? `\n${info.stack}` : '')
-  )
-);
-
-// Crear logger
+// Crear logger (sin transporte de consola para evitar mezcla con TUI)
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   levels,
   format,
   transports: [
-    // Console transport
-    new winston.transports.Console({
-      format: consoleFormat,
-    }),
     // File transport - todos los logs
     new winston.transports.File({
       filename: path.join(logsDir, 'worker.log'),
@@ -68,6 +56,19 @@ const logger = winston.createLogger({
       maxFiles: 5,
     }),
   ],
+});
+
+// Hook para redirigir logs a la TUI cuando esté disponible
+let tuiLogCallback: ((level: string, message: string) => void) | null = null;
+
+export function setTuiLogCallback(callback: (level: string, message: string) => void) {
+  tuiLogCallback = callback;
+}
+
+logger.on('data', (info) => {
+  if (tuiLogCallback && info.level !== 'http') {
+    tuiLogCallback(info.level, info.message);
+  }
 });
 
 export default logger;

@@ -1,12 +1,17 @@
 import 'dotenv/config';
 import WorkerAgent from './worker/agent';
-import logger from './utils/logger';
+import logger, { setTuiLogCallback } from './utils/logger';
 import config from './config/env';
 import { startTUI, addLogToDashboard } from './tui';
 import { kioskManager } from './tui/utils/kiosk';
 import { workerEvents } from './events/worker-events';
 
 let agent: WorkerAgent;
+
+// Conectar logger con TUI
+setTuiLogCallback((level, message) => {
+  addLogToDashboard(level, message);
+});
 
 /**
  * Iniciar agente
